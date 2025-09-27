@@ -3,27 +3,6 @@
 ##
 FROM node:20-slim AS deps
 
-# Install required packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    python3 \
-    build-essential \
-    ca-certificates \
-    # Add Puppeteer dependencies
-    chromium \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    && rm -rf /var/lib/apt/lists/*
-
 # (Optional) Enable corepack to ensure Yarn is available
 RUN corepack enable
 
@@ -31,10 +10,6 @@ WORKDIR /app
 
 # Copy only package files for dependency installation
 COPY package.json yarn.lock ./
-
-# Set environment variable to skip Puppeteer download
-ENV PUPPETEER_SKIP_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Install dependencies
 RUN \
@@ -54,7 +29,6 @@ FROM node:20-slim AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     build-essential \
-    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -64,10 +38,6 @@ COPY --from=deps /app/node_modules ./node_modules
 
 # Copy the rest of the source code
 COPY . .
-
-# Build-time environment variables (needed by Next.js at build)
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Disable telemetry at build time
 ENV NEXT_TELEMETRY_DISABLED=1
