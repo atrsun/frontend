@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  holoo-front:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://api.crm.atrsun.com
+    container_name: holoo-front
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web
+      - traefik.http.routers.holoo-front.rule=Host(`crm.atrsun.com`)
+      - traefik.http.routers.holoo-front.entrypoints=websecure
+      - traefik.http.routers.holoo-front.tls.certresolver=letsencrypt
+      - traefik.http.services.holoo-front.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true

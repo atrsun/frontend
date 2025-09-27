@@ -1,0 +1,104 @@
+name: Deploy Frontend to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Clean target directory on server
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASS }}
+          port: 22
+          script: |
+            rm -rf /.esmaili/src/frontend
+            mkdir -p /.esmaili/src/frontend
+
+      - name: Copy code to server
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASS }}
+          port: 22
+          source: "./"
+          target: "/.esmaili/src/frontend"
+
+      - name: Build & Deploy Frontend on Server
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASS }}
+          port: 22
+          script: |
+            set -euo pipefail
+
+            cd /.esmaili/src/frontend
+
+            VERSION=$(jq -r .version package.json)
+            IMAGE="atrsun-crm-frontend:${VERSION}"
+            echo "Image tag: $IMAGE"
+
+            if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+              echo "Building $IMAGE"
+              docker build --build-arg NEXT_PUBLIC_API_URL="https://crm.atrsun.com/api" -t "$IMAGE" .
+            else
+              echo "Image $IMAGE already exists, skip build."
+            fi
+
+            export IMAGE_TAG=${VERSION}
+            export SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+
+            SERVICE_NAME="frontend_atrsun-crm"
+
+            service_exists() {
+              docker service inspect "$1" >/dev/null 2>&1
+            }
+
+            safe_scale() {
+              local svc="$1"
+              local replicas="$2"
+              if service_exists "$svc"; then
+                echo "Attempting to scale $svc => $replicas"
+                docker service scale "${svc}=${replicas}" || echo "Scaling failed, skipping"
+              else
+                echo "Service $svc not found — skipping scale(${replicas})."
+              fi
+            }
+
+            CURRENT_IMAGE=""
+            if service_exists "$SERVICE_NAME"; then
+              CURRENT_IMAGE=$(docker service inspect "$SERVICE_NAME" --format '{{(index .Spec.TaskTemplate.ContainerSpec.Image)}}' 2>/dev/null || true)
+            fi
+
+            if [ -n "$CURRENT_IMAGE" ] && [ "$CURRENT_IMAGE" = "$IMAGE" ]; then
+              echo "Performing rolling update for $SERVICE_NAME..."
+              safe_scale "$SERVICE_NAME" 2
+              sleep 30
+              docker service update --force "$SERVICE_NAME" || echo "Update failed, fallback to deploy"
+              sleep 30
+              safe_scale "$SERVICE_NAME" 1
+            else
+              echo "Deploying stack..."
+              envsubst < /.esmaili/src/frontend/stacks/stage-stack.yml | docker stack deploy --with-registry-auth -c - frontend
+              sleep 30
+              safe_scale "$SERVICE_NAME" 1
+            fi
+
+            echo "Cleaning up unused Docker resources..."
+            docker image prune -af || true
+            docker container prune -f || true
+            docker volume prune -f || true
+            docker network prune -f || true
+            echo "Cleanup complete."

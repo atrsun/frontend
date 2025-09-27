@@ -1,0 +1,32 @@
+services:
+  atrsun-frontend:
+    image: atrsun-crm-frontend:${IMAGE_TAG}
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: https://crm.atrsun.com/api
+      SESSION_SECRET: ${SESSION_SECRET}
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        window: 30s
+    networks:
+      - reverse_proxy_network
+
+networks:
+  reverse_proxy_network:
+    name: reverse_proxy_network
+    external: true

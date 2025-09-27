@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  holoo-front:
+    container_name: holoo-front
+    build:
+      context: ../
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+        - NEXT_PUBLIC_SENTRY_URL=${NEXT_PUBLIC_SENTRY_URL}
+        - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+    image: holoo-front:latest
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_SENTRY_URL=${NEXT_PUBLIC_SENTRY_URL}
+      - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.holoo-front.rule=Host(`crm.evasence.ir`)'
+      - 'traefik.http.routers.holoo-front.entrypoints=websecure'
+      - 'traefik.http.routers.holoo-front.tls.certresolver=lets-encrypt'
+      - 'traefik.http.routers.holoo-front.service=holoo-front'
+      - 'traefik.http.services.holoo-front.loadbalancer.server.port=3000'
+      - 'traefik.http.middlewares.holoo-front-compress.compress=true'
+      - 'traefik.http.middlewares.holoo-front-hostrewrite.headers.customRequestHeaders.Host=crm.evasence.ir'
+      - 'traefik.http.middlewares.holoo-front-basicauth.basicauth.users=shamimatr:$2y$05$JACRwjeXiuHFlqSqB9WEh.BqdDZnfnFm4OAmri9A/so0SLNaBWgZm'
+      - 'traefik.http.routers.holoo-front.middlewares=holoo-front-hostrewrite, holoo-front-compress, holoo-front-basicauth'
+networks:
+  web:
+    external: true
