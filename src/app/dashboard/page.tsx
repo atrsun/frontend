@@ -16,6 +16,7 @@ export default function DashboardPage() {
 
   // Fetch data on component mount
   useEffect(() => {
+    console.log("hi")
     fetchProducts();
   }, []);
 
@@ -26,7 +27,9 @@ export default function DashboardPage() {
 
     try {
       // Fetch products
+      console.log("abc")
       const productsResponse = await productService.getProducts({ limit: 5 });
+      console.log(productsResponse)
       
       if (productsResponse && productsResponse.product) {
         let productsList: HolooProduct[] = [];

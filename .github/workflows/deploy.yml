@@ -52,7 +52,7 @@ jobs:
 
             if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
               echo "Building $IMAGE"
-              docker build --build-arg NEXT_PUBLIC_API_URL="https://crm.atrsun.com/api" -t "$IMAGE" .
+              docker build --build-arg NEXT_PUBLIC_API_URL="http://45.138.135.162:3000/" -t "$IMAGE" .
             else
               echo "Image $IMAGE already exists, skip build."
             fi
