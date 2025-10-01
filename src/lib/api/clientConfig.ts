@@ -22,7 +22,7 @@ const apiClient = axios.create({
     Accept: "application/json",
   },
   timeout: 60000, // 30 seconds timeout
-  // withCredentials: true, // Important: this ensures cookies are sent with requests
+  withCredentials: true, // Important: this ensures cookies are sent with requests
 });
 
 // Request interceptor

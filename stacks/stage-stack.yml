@@ -4,8 +4,8 @@ services:
     environment:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
-      PORT: 
-      NEXT_PUBLIC_API_URL: http://45.138.135.162:3000
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: https://api1.evasence.ir
       SESSION_SECRET: ${SESSION_SECRET}
     deploy:
       mode: replicated
