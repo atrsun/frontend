@@ -3,7 +3,7 @@ import { testApiConnection, testLoginEndpoint } from '@/lib/api/testConnection';
 
 export async function GET() {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api1.evasence.ir/';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api1.evasence.ir';
     
     // Test the API connection
     const connectionTest = await testApiConnection(apiUrl);

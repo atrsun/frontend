@@ -99,7 +99,7 @@ const productService = {
    */
   getProducts: async (params: ProductListParams = {}) => {
     const url = `${
-      process.env.NEXT_PUBLIC_API_URL || "https://api1.evasence.ir/"
+      process.env.NEXT_PUBLIC_API_URL || "https://api1.evasence.ir"
         // process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
 
     }/holoo/products?limit=${params.limit || 10}&page=${params.page || 1}`;

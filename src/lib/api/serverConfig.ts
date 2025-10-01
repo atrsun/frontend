@@ -5,7 +5,7 @@ const DEBUG_MODE = process.env.NODE_ENV === "development";
 
 // Base URL from environment variable or default
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api1.evasence.ir/";
+  process.env.NEXT_PUBLIC_API_URL || "https://api1.evasence.ir";
     // process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 
