@@ -8,7 +8,7 @@ const DEBUG_MODE = process.env.NODE_ENV === "development";
 // Base URL from environment variable or default
 const API_BASE_URL =
   // process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-  process.env.NEXT_PUBLIC_API_URL || "https://holoo.evasence.ir";
+  process.env.NEXT_PUBLIC_API_URL || "https://https://api1.evasence.ir/";
 
 if (DEBUG_MODE) {
   console.log("API Base URL:", API_BASE_URL);
