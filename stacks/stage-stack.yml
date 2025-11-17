@@ -24,7 +24,7 @@ services:
         max_attempts: 3
         window: 30s
     networks:
-      - reverse_proxy_network
+      - frontend
     ports:
       - "3001:3001"
 
