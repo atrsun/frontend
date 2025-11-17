@@ -25,6 +25,8 @@ services:
         window: 30s
     networks:
       - reverse_proxy_network
+    ports:
+      - "3000:3000"
 
 networks:
   reverse_proxy_network:
