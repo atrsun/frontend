@@ -29,6 +29,5 @@ services:
       - "3000:3000"
 
 networks:
-  reverse_proxy_network:
-    name: reverse_proxy_network
-    external: true
+  frontend:
+    name: frontend
