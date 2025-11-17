@@ -10,15 +10,20 @@ export async function POST(request: Request) {
     const { email, password } = body;
 
     if (!email || !password) {
+      console.log('Login attempt failed: Missing email or password');
       return NextResponse.json(
         { error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
+    console.log(`Login attempt for email: ${email}`);
+
     try {
       // Call the authentication service
       const authResponse = await authService.login({ email, password });
+      console.log(`Authentication successful for user: ${authResponse.user.id}`);
+      
       // Create session data
       const session: SessionData = {
         user: authResponse.user,
@@ -28,6 +33,7 @@ export async function POST(request: Request) {
       
       // Save the session and get the response with the cookie
       const sessionResponse = await saveSession(session);
+      console.log(`Session created successfully for user: ${session.user.id}`);
       
       // Copy the Set-Cookie header to our response
       const response = NextResponse.json({
@@ -36,6 +42,7 @@ export async function POST(request: Request) {
       });
       
       response.headers.set('Set-Cookie', sessionResponse.headers.get('Set-Cookie') || '');
+      console.log(`Login completed successfully for user: ${session.user.email}`);
       
       return response;
     } catch (error: any) {
@@ -46,6 +53,7 @@ export async function POST(request: Request) {
           email === 'admin@example.com' && 
           password === 'admin123') {
         
+        console.log('Demo login used for development');
         const mockUser = {
           id: 1,
           name: 'مدیر سیستم',
@@ -62,6 +70,7 @@ export async function POST(request: Request) {
         
         // Save the session and get the response with the cookie
         const sessionResponse = await saveSession(session);
+        console.log('Demo session created successfully');
         
         // Copy the Set-Cookie header to our response
         const response = NextResponse.json({
@@ -85,17 +94,21 @@ export async function POST(request: Request) {
         } else if (error.response.status === 404) {
           errorMessage = 'آدرس API نامعتبر است. لطفا با پشتیبانی تماس بگیرید.';
         }
+        console.log(`Authentication failed for ${email}: ${errorMessage}`);
       } else if (error.request) {
         errorMessage = 'سرور پاسخگو نیست. لطفا اتصال اینترنت خود را بررسی کنید.';
+        console.log(`Network error during login for ${email}: Server not responding`);
+      } else {
+        console.log(`General error during login for ${email}: ${error.message}`);
       }
       
       return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
   } catch (error) {
-    console.error('Server error:', error);
+    console.error('Server error in login handler:', error);
     return NextResponse.json(
       { error: 'An unexpected error occurred' },
       { status: 500 }
     );
   }
-} 
+}
