@@ -9,19 +9,9 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 // Enable debug mode for development
 const DEBUG_MODE = process.env.NODE_ENV === "development";
 
-// Base URL from environment variable or default to the documentation URL
-const API_BASE_URL =
-  // process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-  process.env.NEXT_PUBLIC_API_URL || "https://api.atrsun.com";
-// 
-if (DEBUG_MODE) {
-  console.log("API Base URL:", API_BASE_URL);
-}
-
 // Create axios instance with default config
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "https://api.atrsun.com",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
