@@ -25,9 +25,13 @@ services:
         window: 30s
     networks:
       - frontend
+      - reverse_proxy_network
     ports:
       - "3001:3001"
 
 networks:
   frontend:
     name: frontend
+  reverse_proxy_network:
+    name: reverse_proxy_network
+    external: true
